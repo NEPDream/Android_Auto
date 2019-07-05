@@ -142,3 +142,107 @@ function adj_volume(x) {
         while (!swipe((location.centerX() + location.left) / 2, location.centerY(), location.left, location.centerY(), 200));
     };
 };
+
+function adaptive_brightness() {
+    launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
+    while (!click("Adaptive brightness"));
+    while (!bounds(904, 297, 1017, 355).findOne(5000).click());
+    while (bounds(904, 297, 1017, 355).findOne(5000).text() == "Off") {
+        while (!bounds(904, 297, 1017, 355).findOne(5000).click());
+    };
+};
+
+// 0 1
+function timer_sound(x) {
+    launch_package("com.sec.android.app.clockpackage");
+    while (!click("Timer"));
+    var location = bounds(956, 63, 1080, 210).findOne(5000).bounds();
+    while (!click(location.centerX(), location.centerY()));
+    while (!click("Set timer sound"));
+    if (x == 0) {
+        while (!click("Silent")) {
+            scrollUp();
+            sleep(500);
+        };
+    } else {
+        while (!click("Time Up")) {
+            scrollDown();
+            sleep(500);
+        };
+    };
+};
+
+function off_nfc() {
+    launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
+    while (!textContains("Make mobile payments, share data").exists()) {
+        while (!bounds(880, 634, 1080, 830).findOne(5000).click());
+        sleep(500);
+    };
+};
+
+// "OFF" "ATT"
+function mobile_data(x) {
+    launch_activity("com.sec.android.app.simsettingmgr", "com.sec.android.app.simsettingmgr.NetworkManagement");
+    while (!click("Mobile data"));
+    while (!click(x));
+};
+
+// "Off" "On"
+function switch_wlan(x) {
+    launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
+    while (bounds(880, 242, 1080, 438).findOne(5000).text() != x) {
+        while (!bounds(880, 242, 1080, 438).findOne(5000).click());
+    };
+};
+
+// "On" "Off"
+function hard_press_home(x) {
+    launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
+    while (!click("Navigation bar")) {
+        scrollDown();
+        sleep(300);
+    }
+    while (!click("Hard press Home button"));
+    while (bounds(904, 297, 1017, 355).findOne(5000).text() != x) {
+        while (!bounds(904, 297, 1017, 355).findOne(5000).click());
+    };
+};
+
+function close_all() {
+    while (!recents());
+    sleep(500);
+    while (!click("Close all"));
+};
+
+// "Optimized" "Medium power saving"
+function power_mode(x) {
+    launch_activity("com.samsung.android.sm_cn", "com.samsung.android.sm.battery.ui.BatteryActivity");
+    while (!click("Power mode"));
+    while (!click(x));
+    if (x != "Optimized") {
+        while (!click("Apply"));
+    };
+    sleep(1000);
+    waitForActivity("com.samsung.android.sm.battery.ui.mode.PowerModeSettingsActivity");
+};
+
+function freeze_app() {
+    while (!home());
+    sleep(500);
+    while (!click("Ice Box"));
+    while (!bounds(0, 2073, 228, 2220).findOne(5000).click());
+};
+
+function turnoff_work_profile() {
+    while (!quickSettings());
+    sleep(500);
+    while (!click("Work profile"));
+    while (!click("Details"));
+    sleep(500);
+    if (textContains("Turn on").exists()) {
+        while (!click("Cancel"));
+    } else {
+        while (!bounds(904, 1793, 1017, 1851).findOne(5000).click());
+        while (!click("TURN OFF"));
+    };
+};
