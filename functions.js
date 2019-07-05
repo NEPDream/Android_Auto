@@ -112,3 +112,33 @@ function wechat_speaker(x) {
     while (!click("Log Out of WeChat for Windows"));
     while (!click("Exit"));
 };
+
+// 0 1
+function adj_volume(x) {
+    launch_activity("com.android.settings", "com.android.settings.Settings$SoundSettingsActivity");
+    waitForActivity("com.android.settings.Settings$SoundSettingsActivity")
+    while (!click("Volume"));
+    if (x == 0) {
+        var location = desc("Notifications").findOne(5000).bounds();
+        while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
+        var location = desc("System").findOne(5000).bounds();
+        while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
+        var location = desc("Media").findOne(5000).bounds();
+        while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
+        var location = desc("Bixby Voice").findOne(5000).bounds();
+        while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
+        var location = desc("Ringtone").findOne(5000).bounds();
+        while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
+    } else {
+        var location = desc("Ringtone").findOne(5000).bounds();
+        while (!swipe(location.left, location.centerY(), (location.centerX() + location.left) / 2, location.centerY(), 200));
+        var location = desc("Notifications").findOne(5000).bounds();
+        while (!swipe(location.left, location.centerY(), (location.centerX() + location.left) / 2, location.centerY(), 200));
+        var location = desc("Media").findOne(5000).bounds();
+        while (!swipe(location.left, location.centerY(), (location.centerX() + location.left) / 2, location.centerY(), 200));
+        var location = desc("Bixby Voice").findOne(5000).bounds();
+        while (!swipe((location.centerX() + location.left) / 2, location.centerY(), (location.centerX() + location.right) / 2, location.centerY(), 200));
+        var location = desc("System").findOne(5000).bounds();
+        while (!swipe((location.centerX() + location.left) / 2, location.centerY(), location.left, location.centerY(), 200));
+    };
+};
