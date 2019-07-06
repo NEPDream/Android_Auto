@@ -1,24 +1,33 @@
 function launch_package(x) {
-    app.launchPackage(x);
-    waitForPackage(x);
+    while (currentPackage() != x) {
+        app.launchPackage(x);
+        sleep(500);
+    };
 };
 
 function launch_activity(x1, x2) {
-    app.startActivity({
-        packageName: x1,
-        className: x2,
-    });
-    waitForActivity(x2);
+    while (currentActivity() != x2) {
+        app.startActivity({
+            packageName: x1,
+            className: x2,
+        });
+        sleep(500);
+    };
 };
 
-function screen_timeout_10min() {
-    launch_activity("com.android.settings", "com.samsung.android.settings.display.ScreenTimeoutActivity");
-    while (!click("10 minutes"));
+function tap_back(x) {
+    var i = 0;
+    while (i < x) {
+        while (!back());
+        sleep(300);
+        i++;
+    };
 };
 
-function screen_timeout_30second() {
+// "10 minutes" "30 seconds"
+function screen_timeout(x) {
     launch_activity("com.android.settings", "com.samsung.android.settings.display.ScreenTimeoutActivity");
-    while (!click("30 seconds"));
+    while (!click(x));
 };
 
 // "On" "Off"
@@ -36,6 +45,7 @@ function fastcharge(x) {
     if (bounds(904, 1623, 1017, 1681).findOne(5000).text() != x) {
         while (!bounds(904, 1623, 1017, 1681).findOne(5000).click());
     };
+    tap_back(2);
 };
 
 // "ON" "OFF"
@@ -73,22 +83,31 @@ function MiBand3_alert(x) {
             while (!click("Got it"));
         };
     };
-    while (!bounds(21, 73, 121, 173).findOne(5000).click());
+    tap_back(4);
+};
+
+function wechat_logout() {
+    launch_package("com.tencent.mm");
+    tap_back(8);
+    launch_package("com.tencent.mm");
+    while (!bounds(0, 2069, 270, 2220).findOne(5000).click());
+    var location = bounds(0, 63, 778, 193).findOne(5000).bounds();
+    while (!click(location.centerX(), location.centerY()));
+    while (!click(location.centerX(), location.centerY()));
     sleep(500);
-    while (!bounds(21, 73, 121, 173).findOne(5000).click());
-    sleep(500);
-    while (!bounds(21, 73, 121, 173).findOne(5000).click());
-    sleep(500);
-    while (!back());
+    if (textContains("Logged in to WeChat for Windows").exists()) {
+        while (!bounds(0, 195, 1080, 325).findOne(5000).click());
+        while (!click("Log Out of WeChat"));
+        while (!click("Exit"));
+        waitForActivity("com.tencent.mm.ui.LauncherUI");
+    };
+    tap_back(1);
 };
 
 // "Disabled" "Enabled"
 function wechat_speaker(x) {
-    app.openAppSetting("com.tencent.mm");
-    waitForActivity("com.android.settings.applications.InstalledAppDetailsTop");
-    while (!click("Force stop"));
-    sleep(500);
-    while (!click("Force stop"));
+    launch_package("com.tencent.mm");
+    tap_back(8);
     launch_package("com.tencent.mm");
     while (!bounds(810, 2069, 1080, 2220).findOne(5000).click());
     while (!click("Settings"));
@@ -100,24 +119,14 @@ function wechat_speaker(x) {
         location = bounds(915, 237, 1037, 302).findOne(5000).bounds();
         while (!click(location.centerX(), location.centerY()));
     };
-    while (!bounds(0, 63, 108, 193).findOne(5000).click());
-    sleep(500);
-    while (!bounds(0, 63, 108, 193).findOne(5000).click());
-    sleep(500);
-    while (!bounds(0, 2069, 270, 2220).findOne(5000).click());
-    sleep(1000);
-    if (textContains("Logged in to WeChat for Windows").exists()) {
-        while (!bounds(0, 195, 1080, 325).findOne(5000).click());
-    };
-    while (!click("Log Out of WeChat for Windows"));
-    while (!click("Exit"));
+    tap_back(3);
 };
 
 // 0 1
 function adj_volume(x) {
     launch_activity("com.android.settings", "com.android.settings.Settings$SoundSettingsActivity");
-    waitForActivity("com.android.settings.Settings$SoundSettingsActivity")
     while (!click("Volume"));
+    sleep(500);
     if (x == 0) {
         var location = desc("Notifications").findOne(5000).bounds();
         while (!swipe(location.centerX(), location.centerY(), location.left, location.centerY(), 200));
@@ -141,6 +150,7 @@ function adj_volume(x) {
         var location = desc("System").findOne(5000).bounds();
         while (!swipe((location.centerX() + location.left) / 2, location.centerY(), location.left, location.centerY(), 200));
     };
+    tap_back(2);
 };
 
 function adaptive_brightness() {
@@ -148,8 +158,10 @@ function adaptive_brightness() {
     while (!click("Adaptive brightness"));
     while (!bounds(904, 297, 1017, 355).findOne(5000).click());
     while (bounds(904, 297, 1017, 355).findOne(5000).text() == "Off") {
+        sleep(500);
         while (!bounds(904, 297, 1017, 355).findOne(5000).click());
     };
+    tap_back(2);
 };
 
 // 0 1
@@ -170,6 +182,7 @@ function timer_sound(x) {
             sleep(500);
         };
     };
+    tap_back(2);
 };
 
 function off_nfc() {
@@ -178,6 +191,7 @@ function off_nfc() {
         while (!bounds(880, 634, 1080, 830).findOne(5000).click());
         sleep(500);
     };
+    tap_back(1);
 };
 
 // "OFF" "ATT"
@@ -185,6 +199,7 @@ function mobile_data(x) {
     launch_activity("com.sec.android.app.simsettingmgr", "com.sec.android.app.simsettingmgr.NetworkManagement");
     while (!click("Mobile data"));
     while (!click(x));
+    tap_back(1);
 };
 
 // "Off" "On"
@@ -192,11 +207,14 @@ function switch_wlan(x) {
     launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
     while (bounds(880, 242, 1080, 438).findOne(5000).text() != x) {
         while (!bounds(880, 242, 1080, 438).findOne(5000).click());
+        sleep(500);
     };
+    tap_back(1);
 };
 
 // "On" "Off"
 function hard_press_home(x) {
+    launch_package("com.android.settings");
     launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
     while (!click("Navigation bar")) {
         scrollDown();
@@ -206,31 +224,40 @@ function hard_press_home(x) {
     while (bounds(904, 297, 1017, 355).findOne(5000).text() != x) {
         while (!bounds(904, 297, 1017, 355).findOne(5000).click());
     };
+    tap_back(4);
 };
 
 function close_all() {
     while (!recents());
     sleep(500);
     while (!click("Close all"));
+    sleep(500);
 };
 
 // "Optimized" "Medium power saving"
 function power_mode(x) {
     launch_activity("com.samsung.android.sm_cn", "com.samsung.android.sm.battery.ui.BatteryActivity");
     while (!click("Power mode"));
+    sleep(500);
     while (!click(x));
     if (x != "Optimized") {
         while (!click("Apply"));
     };
     sleep(1000);
     waitForActivity("com.samsung.android.sm.battery.ui.mode.PowerModeSettingsActivity");
+    tap_back(2);
 };
 
 function freeze_app() {
     while (!home());
     sleep(500);
     while (!click("Ice Box"));
-    while (!bounds(0, 2073, 228, 2220).findOne(5000).click());
+    sleep(500);
+    if (textContains("Turn on").exists()) {
+        while (!click("Cancel"));
+    } else {
+        while (!bounds(0, 2073, 228, 2220).findOne(5000).click());
+    };
 };
 
 function turnoff_work_profile() {
