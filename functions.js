@@ -33,7 +33,7 @@ function screen_timeout(x) {
 // "On" "Off"
 function fastcharge(x) {
     launch_activity("com.samsung.android.sm_cn", "com.samsung.android.sm.battery.ui.BatteryActivity");
-    while (className("android.widget.TextView").textContains("connected").exists()) {
+    while (device.isCharging()) {
         alert("Please disconnect charger!");
         sleep(500);
     };
@@ -99,13 +99,15 @@ function wechat_logout() {
         while (!bounds(0, 195, 1080, 325).findOne(5000).click());
         while (!click("Log Out of WeChat"));
         while (!click("Exit"));
-        waitForActivity("com.tencent.mm.ui.LauncherUI");
+        while (!bounds(38, 97, 199, 159).text("WeChat").exists()) {
+            sleep(500);
+        };
     };
     tap_back(1);
 };
 
 // "Disabled" "Enabled"
-function wechat_speaker(x) {
+function wechat_offspeaker(x) {
     launch_package("com.tencent.mm");
     tap_back(8);
     launch_package("com.tencent.mm");
@@ -154,14 +156,17 @@ function adj_volume(x) {
 };
 
 function adaptive_brightness() {
-    launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
-    while (!click("Adaptive brightness"));
-    while (!bounds(904, 297, 1017, 355).findOne(5000).click());
-    while (bounds(904, 297, 1017, 355).findOne(5000).text() == "Off") {
-        sleep(500);
-        while (!bounds(904, 297, 1017, 355).findOne(5000).click());
-    };
-    tap_back(2);
+    // launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
+    // while (!click("Adaptive brightness"));
+    // while (!bounds(904, 297, 1017, 355).findOne(5000).click());
+    // while (bounds(904, 297, 1017, 355).findOne(5000).text() == "Off") {
+    //     sleep(500);
+    //     while (!bounds(904, 297, 1017, 355).findOne(5000).click());
+    // };
+    // tap_back(2);
+    device.setBrightnessMode(0);
+    sleep(800);
+    device.setBrightnessMode(1);
 };
 
 // 0 1
@@ -272,4 +277,20 @@ function turnoff_work_profile() {
         while (!bounds(904, 1793, 1017, 1851).findOne(5000).click());
         while (!click("TURN OFF"));
     };
+};
+
+function start_timer(x1, x2, x3) {
+    launch_package("com.sec.android.app.clockpackage");
+    while (!click("Timer"));
+    sleep(1000);
+    if (text("Cancel").exists()) {
+        while (!click("Cancel"));
+    };
+    while (!bounds(428, 706, 652, 923).findOne(5000).click());
+    sleep(500);
+    while (!setText(0, x1));
+    while (!setText(1, x2));
+    while (!setText(2, x3));
+    while (!click("Start"));
+    tap_back(1);
 };
