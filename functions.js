@@ -294,3 +294,42 @@ function start_timer(x1, x2, x3) {
     while (!click("Start"));
     tap_back(1);
 };
+
+function go_out() {
+    device.keepScreenDim(10 * 60000);
+    fastcharge("On");
+    freeze_app();
+    MiBand3_alert("ON");
+    close_all();
+    mobile_data("ATT");
+    wechat_offspeaker("Enabled");
+    wechat_logout();
+    adj_volume(0);
+    adaptive_brightness();
+    timer_sound(0);
+    off_nfc();
+    hard_press_home("Off");
+    power_mode("Medium power saving");
+    turnoff_work_profile();
+    screen_timeout("30 seconds");
+    device.cancelKeepingAwake();
+    alert("All actions is done!");
+};
+
+function back_home() {
+    device.keepScreenDim(10 * 60000);
+    fastcharge("Off");
+    switch_wlan("On");
+    MiBand3_alert("OFF");
+    wechat_offspeaker("Disabled");
+    adj_volume(1);
+    adaptive_brightness();
+    timer_sound(1);
+    off_nfc();
+    mobile_data("OFF");
+    hard_press_home("On");
+    power_mode("Optimized");
+    screen_timeout("30 seconds");
+    device.cancelKeepingAwake();
+    alert("All actions is done!");
+};
