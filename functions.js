@@ -88,8 +88,9 @@ function MiBand3_alert(x) {
 
 function wechat_logout() {
     launch_package("com.tencent.mm");
-    tap_back(8);
-    launch_package("com.tencent.mm");
+    while (!bounds(93, 2161, 176, 2204).text("Chats").exists()) {
+        tap_back(1);
+    };
     while (!bounds(0, 2069, 270, 2220).findOne(5000).click());
     var location = bounds(0, 63, 778, 193).findOne(5000).bounds();
     while (!click(location.centerX(), location.centerY()));
@@ -109,8 +110,9 @@ function wechat_logout() {
 // "Disabled" "Enabled"
 function wechat_offspeaker(x) {
     launch_package("com.tencent.mm");
-    tap_back(8);
-    launch_package("com.tencent.mm");
+    while (!bounds(93, 2161, 176, 2204).text("Chats").exists()) {
+        tap_back(1);
+    };
     while (!bounds(810, 2069, 1080, 2220).findOne(5000).click());
     while (!click("Settings"));
     sleep(500);
@@ -156,14 +158,6 @@ function adj_volume(x) {
 };
 
 function adaptive_brightness() {
-    // launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
-    // while (!click("Adaptive brightness"));
-    // while (!bounds(904, 297, 1017, 355).findOne(5000).click());
-    // while (bounds(904, 297, 1017, 355).findOne(5000).text() == "Off") {
-    //     sleep(500);
-    //     while (!bounds(904, 297, 1017, 355).findOne(5000).click());
-    // };
-    // tap_back(2);
     device.setBrightnessMode(0);
     sleep(800);
     device.setBrightnessMode(1);
@@ -295,6 +289,24 @@ function start_timer(x1, x2, x3) {
     tap_back(1);
 };
 
+// "使用中" "未使用"
+function bixby_voice_wakeup(x) {
+    launch_activity("com.sec.android.app.launcher", "com.android.launcher3.infra.activity.Launcher");
+    sleep(1000);
+    swipe(0, device.height / 2 + 5, device.width / 5 * 4, device.height / 2 - 5, 400);
+    while (!click("Bixby Voice"));
+    var location = bounds(956, 764, 1080, 911).findOne(5000).bounds();
+    while (!click(location.centerX(), location.centerY()));
+    while (!click("设置"));
+    while (!click("语音唤醒"));
+    sleep(500);
+    if (bounds(901, 297, 1017, 355).findOne(5000).text() != x) {
+        while (!bounds(901, 297, 1017, 355).findOne(5000).click());
+    };
+    tap_back(4);
+    home();
+};
+
 function go_out() {
     device.keepScreenDim(10 * 60000);
     fastcharge("On");
@@ -309,11 +321,12 @@ function go_out() {
     timer_sound(0);
     off_nfc();
     hard_press_home("Off");
+    bixby_voice_wakeup("未使用");
     power_mode("Medium power saving");
     turnoff_work_profile();
     screen_timeout("30 seconds");
     device.cancelKeepingAwake();
-    alert("All actions is done!");
+    alert("All actions are done!");
 };
 
 function back_home() {
@@ -328,8 +341,9 @@ function back_home() {
     off_nfc();
     mobile_data("OFF");
     hard_press_home("On");
+    bixby_voice_wakeup("使用中");
     power_mode("Optimized");
     screen_timeout("30 seconds");
     device.cancelKeepingAwake();
-    alert("All actions is done!");
+    alert("All actions are done!");
 };
