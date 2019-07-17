@@ -87,9 +87,9 @@ function MiBand3_alert(x) {
 };
 
 function wechat_logout() {
-    launch_package("com.tencent.mm");
     while (!bounds(93, 2161, 176, 2204).text("Chats").exists()) {
         tap_back(1);
+        launch_package("com.tencent.mm");
     };
     while (!bounds(0, 2069, 270, 2220).findOne(5000).click());
     var location = bounds(0, 63, 778, 193).findOne(5000).bounds();
@@ -109,9 +109,9 @@ function wechat_logout() {
 
 // "Disabled" "Enabled"
 function wechat_offspeaker(x) {
-    launch_package("com.tencent.mm");
     while (!bounds(93, 2161, 176, 2204).text("Chats").exists()) {
         tap_back(1);
+        launch_package("com.tencent.mm");
     };
     while (!bounds(810, 2069, 1080, 2220).findOne(5000).click());
     while (!click("Settings"));
@@ -273,22 +273,6 @@ function turnoff_work_profile() {
     };
 };
 
-function start_timer(x1, x2, x3) {
-    launch_package("com.sec.android.app.clockpackage");
-    while (!click("Timer"));
-    sleep(1000);
-    if (text("Cancel").exists()) {
-        while (!click("Cancel"));
-    };
-    while (!bounds(428, 706, 652, 923).findOne(5000).click());
-    sleep(500);
-    while (!setText(0, x1));
-    while (!setText(1, x2));
-    while (!setText(2, x3));
-    while (!click("Start"));
-    tap_back(1);
-};
-
 // "使用中" "未使用"
 function bixby_voice_wakeup(x) {
     launch_activity("com.sec.android.app.launcher", "com.android.launcher3.infra.activity.Launcher");
@@ -305,6 +289,7 @@ function bixby_voice_wakeup(x) {
     };
     tap_back(4);
     home();
+    sleep(500);
 };
 
 function go_out() {
@@ -312,7 +297,6 @@ function go_out() {
     fastcharge("On");
     freeze_app();
     MiBand3_alert("ON");
-    close_all();
     mobile_data("ATT");
     wechat_offspeaker("Enabled");
     wechat_logout();
@@ -321,12 +305,13 @@ function go_out() {
     timer_sound(0);
     off_nfc();
     hard_press_home("Off");
-    bixby_voice_wakeup("未使用");
+    close_all();
     power_mode("Medium power saving");
     turnoff_work_profile();
     screen_timeout("30 seconds");
+    bixby_voice_wakeup("未使用");
     device.cancelKeepingAwake();
-    alert("All actions are done!");
+    alert("Actions are done!");
 };
 
 function back_home() {
@@ -341,9 +326,126 @@ function back_home() {
     off_nfc();
     mobile_data("OFF");
     hard_press_home("On");
-    bixby_voice_wakeup("使用中");
     power_mode("Optimized");
     screen_timeout("30 seconds");
+    bixby_voice_wakeup("使用中");
     device.cancelKeepingAwake();
-    alert("All actions are done!");
+    alert("Actions are done!");
+};
+
+function ui_environment() {
+    var options = ["Go out of home", "Already back home", "Cancel"];
+    var i = dialogs.select("Please select environment", options);
+    if (i >= 0) {
+        if (i == 0) { go_out(); };
+        if (i == 1) { back_home(); };
+    } else {
+        exit();
+    };
+};
+
+function start_timer(x1, x2, x3) {
+    launch_package("com.sec.android.app.clockpackage");
+    while (!click("Timer"));
+    sleep(1000);
+    if (text("Cancel").exists()) {
+        while (!click("Cancel"));
+    };
+    while (!bounds(428, 706, 652, 923).findOne(5000).click());
+    sleep(500);
+    while (!setText(0, x1));
+    while (!setText(1, x2));
+    while (!setText(2, x3));
+    while (!click("Start"));
+    tap_back(1);
+};
+
+function ui_timer() {
+    var options = ["45 mins", "5 mins", "Cancel"];
+    var i = dialogs.select("Please select timer", options);
+    if (i >= 0) {
+        if (i == 0) { start_timer(0, 45, 0); };
+        if (i == 1) { start_timer(0, 5, 0); };
+    } else {
+        exit();
+    };
+};
+
+// "Scan" "Money"
+function wechat_quicklaunch(x) {
+    while (!bounds(93, 2161, 176, 2204).text("Chats").exists()) {
+        tap_back(1);
+        launch_package("com.tencent.mm");
+    };
+    while (!bounds(0, 2069, 270, 2220).findOne(5000).click());
+    while (!bounds(929, 63, 1080, 193).findOne(5000).click());
+    while (!click(x));
+};
+
+function ui_wechat() {
+    var options = ["Scan", "Pay", "Cancel"];
+    var i = dialogs.select("Please select function", options);
+    if (i >= 0) {
+        if (i == 0) { wechat_quicklaunch("Scan"); };
+        if (i == 1) { wechat_quicklaunch("Money"); };
+    } else {
+        exit();
+    };
+};
+
+// "Scan" "Pay"
+function alipay_quicklaunch(x) {
+    while (!bounds(72, 2097, 143, 2203).text("Home").exists()) {
+        tap_back(1);
+        launch_package("com.eg.android.AlipayGphone");
+    };
+    while (!bounds(0, 2081, 216, 2219).findOne(5000).click());
+    while (!click(x));
+};
+
+function ui_alipay() {
+    var options = ["Scan", "Pay", "Cancel"];
+    var i = dialogs.select("Please select function", options);
+    if (i >= 0) {
+        if (i == 0) { alipay_quicklaunch("Scan"); };
+        if (i == 1) { alipay_quicklaunch("Pay"); };
+    } else {
+        exit();
+    };
+};
+
+// "Add task" "Add event" | "Tasks" "Month"
+function calendar_quicklaunch(x1, x2) {
+    while (!(bounds(870, 2010, 1017, 2157).desc("Add task").exists() || bounds(870, 2010, 1017, 2157).desc("Add event").exists())) {
+        tap_back(1);
+        launch_package("com.samsung.android.calendar");
+    };
+    sleep(500);
+    if (bounds(870, 2010, 1017, 2157).findOne(5000).desc() != x1) {
+        while (!bounds(21, 73, 147, 199).findOne(5000).click());
+        while (!click(x2));
+    }
+};
+
+function ui_calendar() {
+    var options = ["Tasks", "Events", "Cancel"];
+    var i = dialogs.select("Please select function", options);
+    if (i >= 0) {
+        if (i == 0) { calendar_quicklaunch("Add task", "Tasks"); };
+        if (i == 1) { calendar_quicklaunch("Add event", "Month"); };
+    } else {
+        exit();
+    };
+};
+
+function ui_quicklaunch() {
+    var options = ["Wechat", "Alipay", "Calendar", "Cancel"];
+    var i = dialogs.select("Please select APP", options);
+    if (i >= 0) {
+        if (i == 0) { ui_wechat(); };
+        if (i == 1) { ui_alipay(); };
+        if (i == 2) { ui_calendar(); };
+    } else {
+        exit();
+    };
 };
