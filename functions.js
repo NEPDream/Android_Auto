@@ -466,7 +466,6 @@ function island_app(x1, x2) {
     while (!desc("Island").findOne().click());
     while (!packageName("com.oasisfeng.island").desc("Search").id("menu_search").findOne().click());
     while (!setText(x1));
-    back();
     id("entry_name").text(x1).waitFor();
     while (!className("android.widget.Button").desc("App settings").exists()) {
         while (!id("entry_name").text(x1).findOne().click());
@@ -474,6 +473,11 @@ function island_app(x1, x2) {
     };
     if (boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().desc() == x2) {
         while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().click());
+    };
+    sleep(500);
+    if (text("Turn on").exists()) {
+        while (!click("Turn on"));
+        sleep(4000);
     };
     tap_back(2, 500);
 };
