@@ -1,7 +1,7 @@
 function launch_package(x) {
     while (currentPackage() != x) {
         app.launchPackage(x);
-        sleep(500);
+        sleep(1000);
     };
 };
 
@@ -11,7 +11,7 @@ function launch_activity(x1, x2) {
             packageName: x1,
             className: x2,
         });
-        sleep(500);
+        sleep(1000);
     };
 };
 
@@ -28,6 +28,7 @@ function tap_back(x1, x2) {
 function screen_timeout(x) {
     launch_activity("com.android.settings", "com.samsung.android.settings.display.ScreenTimeoutActivity");
     while (!click(x));
+    sleep(500);
 };
 
 // "On" "Off"
@@ -45,6 +46,7 @@ function fastcharge(x) {
         while (!a.click());
     };
     tap_back(2, 300);
+    sleep(500);
 };
 
 // "On" "Off"
@@ -94,7 +96,7 @@ function MiBand3_alert(x) {
 
 function wechat_logout() {
     while (!text("Discover").exists()) {
-        tap_back(1, 300);
+        tap_back(1, 500);
         launch_package("com.tencent.mm");
     };
     var l = className("android.widget.TextView").text("Chats").findOne().bounds();
@@ -102,20 +104,20 @@ function wechat_logout() {
     a = className("android.widget.LinearLayout").id("com.tencent.mm:id/l6").clickable(true).findOne()
     while (!a.click());
     while (!a.click());
-    sleep(500);
+    sleep(1000);
     if (textContains("Logged in to WeChat").exists()) {
         while (!click("Logged in to WeChat"));
         while (!click("Log Out of WeChat"));
         while (!click("Exit"));
         text("Discover").waitFor();
     };
-    tap_back(1, 300);
+    tap_back(1, 500);
 };
 
 // "Disabled" "Enabled"
 function wechat_offspeaker(x) {
     while (!text("Discover").exists()) {
-        tap_back(1, 300);
+        tap_back(1, 500);
         launch_package("com.tencent.mm");
     };
     var l = className("android.widget.TextView").text("Me").findOne().bounds();
@@ -300,8 +302,10 @@ function bixby_voice_wakeup(x) {
     launch_activity("com.sec.android.app.launcher", "com.android.launcher3.infra.activity.Launcher");
     text("Microsoft Launcher").waitFor();
     swipe(0, device.height / 2 + 5, device.width / 5 * 4, device.height / 2 - 5, 400);
+    sleep(1000);
     text("Bixby Voice").clickable(true).waitFor();
     while (!click("Bixby Voice"));
+    sleep(1000);
     desc("搜索").waitFor();
     var a = desc("搜索").findOne().bounds();
     var l = boundsInside(a.right, 0, device.width, device.height).className("android.widget.FrameLayout").enabled(true).drawingOrder(2).findOne().bounds();
