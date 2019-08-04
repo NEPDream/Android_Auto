@@ -103,17 +103,20 @@ funcs.wechat_logout = function () {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
-    var l = className("android.widget.TextView").text("Chats").findOne().bounds();
+    var l = className("android.widget.TextView").drawingOrder(2).text("Chats").findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
-    textContains("WeChat").id("android:id/text1").className("android.widget.TextView").waitFor();
-    a = className("android.widget.LinearLayout").id("com.tencent.mm:id/l6").clickable(true).findOne()
+    text("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
+    var a = className("android.widget.LinearLayout").depth(7).drawingOrder(1).enabled(true).focusable(true).clickable(true).findOne()
     while (!a.click());
     sleep(200);
     while (!a.click());
     sleep(1000);
     if (textContains("Logged in to WeChat").exists()) {
-        while (!click("Logged in to WeChat"));
+        l = textContains("Logged in to WeChat").className("android.widget.TextView").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        text("Mute Mobile Alerts").waitFor();
         while (!click("Log Out of WeChat"));
+        text("Exit").waitFor();
         while (!click("Exit"));
         text("Discover").waitFor();
     };
@@ -126,7 +129,7 @@ funcs.wechat_offspeaker = function (x) {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
-    var l = className("android.widget.TextView").text("Me").id("com.tencent.mm:id/d9a").findOne().bounds();
+    var l = className("android.widget.TextView").drawingOrder(2).text("Me").findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
     text("Favorites").waitFor();
     while (!click("Settings"));
@@ -134,7 +137,7 @@ funcs.wechat_offspeaker = function (x) {
     while (!click("Chats"));
     text("Press Enter to Send").waitFor();
     var l = text("Press Enter to Send").findOne().bounds();
-    var a = boundsInside(0, 0, device.width, l.top).id("com.tencent.mm:id/js").findOne();
+    var a = boundsInside(0, 0, device.width, l.top).className("android.view.View").drawingOrder(3).enabled(true).focusable(true).findOne();
     if (a.desc() != x) {
         while (!click(a.bounds().centerX(), a.bounds().centerY()));
         sleep(1000);
@@ -407,18 +410,31 @@ funcs.calendar_quicklaunch = function (x1, x2) {
 };
 
 // *************QuickLaunch***************
-// "Scan" "Money"
+// "Scan" "Pay"
 funcs.wechat_quicklaunch = function (x) {
     while (!text("Discover").exists()) {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
-    var l = className("android.widget.TextView").text("Chats").findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    textContains("WeChat").id("android:id/text1").className("android.widget.TextView").waitFor();
-    var l = desc("More function buttons").className("android.widget.RelativeLayout").clickable(true).findOne();
-    while (!l.click());
-    while (!click(x));
+    if (x == "Scan") {
+        var l = className("android.widget.TextView").drawingOrder(2).text("Discover").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        text("Moments").className("android.widget.TextView").drawingOrder(1).waitFor();
+        sleep(500);
+        l = text("Scan").className("android.widget.TextView").drawingOrder(1).findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+    };
+    if (x == "Pay") {
+        var l = className("android.widget.TextView").drawingOrder(2).text("Me").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        text("WeChat Pay").className("android.widget.TextView").drawingOrder(1).waitFor();
+        sleep(500);
+        l = text("WeChat Pay").className("android.widget.TextView").drawingOrder(1).findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        text("Wallet").className("android.widget.TextView").waitFor();
+        l = className("android.widget.LinearLayout").clickable(true).drawingOrder(1).depth(12).findOne();
+        while (!l.click());
+    };
 };
 
 funcs.ui_wechat = function () {
@@ -426,7 +442,7 @@ funcs.ui_wechat = function () {
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
         if (i == 0) { funcs.wechat_quicklaunch("Scan"); };
-        if (i == 1) { funcs.wechat_quicklaunch("Money"); };
+        if (i == 1) { funcs.wechat_quicklaunch("Pay"); };
     } else {
         exit();
     };
@@ -479,20 +495,21 @@ funcs.island_app = function (x1, x2) {
 
 funcs.island_wq = function () {
     funcs.island_app("QQ", "Unfreeze");
-    funcs.island_app("Q++模块", "Unfreeze");
+    funcs.island_app("QXposed", "Unfreeze");
     funcs.island_app("WeChat", "Unfreeze");
-    funcs.island_app("微信增强", "Unfreeze");
+    funcs.island_app("WeXposed", "Unfreeze");
     funcs.island_app("TaiChi", "Unfreeze");
     alert("QQ and WeChat in Island are all Unfreezed!")
 };
 
 funcs.ui_quicklaunch = function () {
-    var options = ["Wechat", "Alipay", "Wechat and QQ in Island", "Cancel"];
+    var options = ["Wechat", "Alipay", "Wechat and QQ in Island", "Keep Screen On", "Cancel"];
     var i = dialogs.select("Please select APP", options);
     if (i >= 0) {
         if (i == 0) { funcs.ui_wechat(); };
         if (i == 1) { funcs.ui_alipay(); };
         if (i == 2) { funcs.island_wq(); };
+        if (i == 3) { device.keepScreenDim(10 * 60000); };
     } else {
         exit();
     };
