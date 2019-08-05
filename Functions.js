@@ -471,35 +471,33 @@ funcs.ui_alipay = function () {
     };
 };
 
-// "QQ" | "Unfreeze" "Freeze"
+// ["QQ","QXposed"] | "Unfreeze" "Freeze"
 funcs.island_app = function (x1, x2) {
+    app.openAppSetting("com.oasisfeng.island");
+    while (!click("Force stop"));
+    text("Cancel").waitFor();
+    while (!click("Force stop"));
+    funcs.tap_back(2, 500);
     funcs.launch_package("com.oasisfeng.island");
-    while (!desc("Island").findOne().click());
-    while (!packageName("com.oasisfeng.island").desc("Search").id("menu_search").findOne().click());
-    while (!setText(x1));
-    id("entry_name").text(x1).waitFor();
-    while (!className("android.widget.Button").desc("App settings").exists()) {
-        while (!id("entry_name").text(x1).findOne().click());
-        sleep(300);
-    };
-    if (boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().desc() == x2) {
-        while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().click());
-    };
-    sleep(500);
-    if (text("Turn on").exists()) {
-        while (!click("Turn on"));
-        sleep(4000);
+    while (!desc("Island").clickable(true).findOne().click());
+    for (var i in x1) {
+        while (!packageName("com.oasisfeng.island").clickable(true).desc("Search").findOne().click());
+        while (!setText(x1[i]));
+        id("com.oasisfeng.island:id/entry_name").text(x1[i]).clickable(true).waitFor();
+        while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).textContains(x1[i]).exists()) {
+            while (!id("com.oasisfeng.island:id/entry_name").text(x1[i]).clickable(true).findOne().click());
+            sleep(500);
+        };
+        if (boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().desc() == x2) {
+            while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().click());
+        };
+        sleep(500);
+        if (text("Turn on").exists()) {
+            while (!click("Turn on"));
+            sleep(4000);
+        };
     };
     funcs.tap_back(2, 500);
-};
-
-funcs.island_wq = function () {
-    funcs.island_app("QQ", "Unfreeze");
-    funcs.island_app("QXposed", "Unfreeze");
-    funcs.island_app("WeChat", "Unfreeze");
-    funcs.island_app("WeXposed", "Unfreeze");
-    funcs.island_app("TaiChi", "Unfreeze");
-    alert("QQ and WeChat in Island are all Unfreezed!")
 };
 
 funcs.ui_quicklaunch = function () {
@@ -508,7 +506,7 @@ funcs.ui_quicklaunch = function () {
     if (i >= 0) {
         if (i == 0) { funcs.ui_wechat(); };
         if (i == 1) { funcs.ui_alipay(); };
-        if (i == 2) { funcs.island_wq(); };
+        if (i == 2) { funcs.island_app(["QQ", "QXposed", "WeChat", "WeXposed", "TaiChi"], "Unfreeze"); };
         if (i == 3) { device.keepScreenDim(10 * 60000); };
     } else {
         exit();
