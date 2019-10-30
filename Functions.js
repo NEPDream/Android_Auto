@@ -98,18 +98,31 @@ funcs.MiBand3_alert = function (x) {
     funcs.tap_back(3, 500);
 };
 
+funcs.MiBand3_pair = function (x) {
+    funcs.launch_package("com.xiaomi.hm.health");
+    while (!click("Profile"));
+    while (!click("Mi Band 3"));
+    text("Unlock screen").waitFor();
+    while (textContains("Syncing data").exists());
+    while (!click("Unlock screen"));
+    text("Go to Settings").waitFor();
+    while (!click("Go to Settings"));
+    textContains("Bluetooth pairing request").waitFor();
+    while (!click("OK"));
+    funcs.tap_back(5, 500)
+};
+
 funcs.wechat_logout = function () {
     while (!text("Discover").exists()) {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
-    var l = className("android.widget.TextView").drawingOrder(2).text("Chats").findOne().bounds();
+    var l = bounds(97, 2085, 173, 2161).findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
-    text("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
-    var a = className("android.widget.LinearLayout").depth(7).drawingOrder(1).enabled(true).focusable(true).clickable(true).findOne()
-    while (!a.click());
-    sleep(200);
-    while (!a.click());
+    textContains("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
+    var l = textContains("WeChat").className("android.widget.TextView").drawingOrder(2).findOne().bounds();
+    while (!click(l.centerX(), l.centerY()));
+    while (!click(l.centerX(), l.centerY()));
     sleep(1000);
     if (textContains("Logged in to WeChat").exists()) {
         l = textContains("Logged in to WeChat").className("android.widget.TextView").findOne().bounds();
@@ -159,8 +172,11 @@ funcs.adj_volume = function (x) {
         while (!desc("Navigate up").findOne().click());
         text("Volume").waitFor();
     };
-    while (!click("Volume"), 0);
-    text("Bixby Voice").waitFor();
+    var l = text("Volume").className("android.widget.TextView").findOne().bounds();
+    while (!text("Bixby Voice").exists()) {
+        while (!click(l.centerX(), l.centerY()));
+        sleep(500);
+    };
     if (x == 0) {
         var l = desc("Media").findOne().bounds();
         while (!swipe(l.centerX(), l.centerY(), l.left, l.centerY(), 200));
@@ -191,8 +207,7 @@ funcs.adaptive_brightness = function () {
 funcs.timer_sound = function (x) {
     funcs.launch_package("com.sec.android.app.clockpackage");
     while (!click("Timer"));
-    var a = text("Minutes").findOne().bounds();
-    var l = boundsInside(0, 0, device.width, a.top).className("android.widget.FrameLayout").clickable(false).drawingOrder(2).enabled(true).findOne().bounds();
+    var l = boundsInside(0, 0, device.width, 1 / 3 * device.height).className("android.widget.FrameLayout").clickable(false).drawingOrder(2).enabled(true).findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
     while (!click("Set timer sound"));
     if (x == "Silent") {
@@ -280,11 +295,12 @@ funcs.power_mode = function (x) {
 };
 
 funcs.freeze_app = function () {
-    while (!text("Ice Box").clickable(true).desc("Ice Box,Apps").exists()) {
+    while (!text("Island").className("android.widget.TextView").exists()) {
         home();
         sleep(500);
     };
-    while (!text("Ice Box").clickable(true).desc("Ice Box,Apps").findOne().click());
+    while (!click("Island"));
+    while (!click("Ice Box"));
     sleep(500);
     if (textContains("Turn on").exists()) {
         while (!click("Cancel"));
@@ -316,16 +332,19 @@ funcs.turnoff_work_profile = function () {
 
 // "使用中" "未使用"
 funcs.bixby_voice_wakeup = function (x) {
-    funcs.launch_activity("com.sec.android.app.launcher", "com.android.launcher3.infra.activity.Launcher");
-    text("Entertainment").waitFor();
-    swipe(0, device.height / 2 + 5, device.width / 5 * 4, device.height / 2 - 5, 400);
+    while (!text("Mainland").className("android.widget.TextView").exists()) {
+        home();
+        sleep(500);
+    };
+    text("Mainland").waitFor();
+    swipe(0, device.height / 2 + 5, device.width / 5 * 4, device.height / 2 - 5, 800);
     sleep(1000);
     text("Bixby Voice").clickable(true).waitFor();
     while (!text("Bixby Voice").clickable(true).findOne().click());
     sleep(1000);
     desc("搜索").waitFor();
     var a = desc("搜索").findOne().bounds();
-    var l = boundsInside(a.right, 0, device.width, device.height).className("android.widget.FrameLayout").enabled(true).drawingOrder(2).findOne().bounds();
+    var l = boundsInside(a.right, 0, device.width, device.height).className("android.widget.FrameLayout").enabled(true).findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
     className("android.widget.LinearLayout").depth(3).clickable(true).drawingOrder(4).packageName("com.samsung.android.bixby.agent").findOne().click()
     text("语音唤醒").waitFor();
@@ -341,17 +360,35 @@ funcs.bixby_voice_wakeup = function (x) {
     sleep(500);
 };
 
+funcs.samsung_pay = function (x) {
+    funcs.launch_package("com.samsung.android.spay");
+    id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").waitFor();
+    while (!(id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").findOne().click()));
+    text("Settings").waitFor();
+    while (!click("Settings"));
+    text("Quick access").waitFor();
+    while (!click("Quick access"));
+    text("Lock screen").waitFor();
+    var s = className("android.widget.Switch").find();
+    for (var i = 0; i < s.length; i++) {
+        if (s[i].text() != x) {
+            while (!click(s[i].bounds().centerX(), s[i].bounds().centerY()));
+        };
+    };
+    funcs.tap_back(3, 500);
+};
+
 funcs.go_out = function () {
-    device.keepScreenDim(10 * 60000);
     funcs.fastcharge("On");
-    funcs.freeze_app();
     funcs.MiBand3_alert("On");
-    funcs.mobile_data("ATT");
-    funcs.wechat_offspeaker("Enabled");
+    funcs.mobile_data("Mobile");
     funcs.wechat_logout();
+    funcs.wechat_offspeaker("Enabled");
+    funcs.freeze_app();
     funcs.adj_volume(0);
     funcs.adaptive_brightness();
     funcs.timer_sound("Silent");
+    funcs.samsung_pay("On");
     funcs.off_nfc();
     funcs.hard_press_home("Off");
     funcs.power_mode("Medium power saving");
@@ -364,7 +401,6 @@ funcs.go_out = function () {
 };
 
 funcs.back_home = function () {
-    device.keepScreenDim(10 * 60000);
     funcs.fastcharge("Off");
     funcs.switch_wlan("On");
     funcs.MiBand3_alert("Off");
@@ -372,6 +408,7 @@ funcs.back_home = function () {
     funcs.adj_volume(1);
     funcs.adaptive_brightness();
     funcs.timer_sound("Time Up");
+    funcs.samsung_pay("Off");
     funcs.off_nfc();
     funcs.mobile_data("OFF");
     funcs.hard_press_home("On");
@@ -402,38 +439,35 @@ funcs.calendar_quicklaunch = function (x1, x2) {
     };
     var l = className("android.widget.ImageButton").id("com.samsung.android.calendar:id/floating_action_button").findOne();
     if (l.desc() != x1) {
-        var l = desc("Show navigation menu").clickable(true).findOne();
-        while (!l.click());
+        var l = className("android.widget.FrameLayout").id("com.samsung.android.calendar:id/open_drawer_container").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
         text("Reminder").waitFor();
         while (!click(x2));
     };
 };
 
 // *************QuickLaunch***************
-// "Scan" "Pay"
-funcs.wechat_quicklaunch = function (x) {
+// "Scan" "Money" | 1 2
+funcs.wechat_quicklaunch = function (x1, x2) {
     while (!text("Discover").exists()) {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
-    if (x == "Scan") {
-        var l = className("android.widget.TextView").drawingOrder(2).text("Discover").findOne().bounds();
+    var l = bounds(97, 2085, 173, 2161).findOne().bounds();
+    while (!click(l.centerX(), l.centerY()));
+    textContains("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
+    if (x2 == 1) {
+        var l = id("com.tencent.mm:id/ra").clickable(true).className("android.widget.ImageView").findOne().bounds();
         while (!click(l.centerX(), l.centerY()));
-        text("Moments").className("android.widget.TextView").drawingOrder(1).waitFor();
-        sleep(500);
-        l = text("Scan").className("android.widget.TextView").drawingOrder(1).findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
+        while (!click(x1));
     };
-    if (x == "Pay") {
-        var l = className("android.widget.TextView").drawingOrder(2).text("Me").findOne().bounds();
+    if (x2 == 2) {
+        var l = id("com.tencent.mm:id/r9").clickable(true).className("android.widget.ImageView").findOne().bounds();
         while (!click(l.centerX(), l.centerY()));
-        text("WeChat Pay").className("android.widget.TextView").drawingOrder(1).waitFor();
-        sleep(500);
-        l = text("WeChat Pay").className("android.widget.TextView").drawingOrder(1).findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
-        text("Wallet").className("android.widget.TextView").waitFor();
-        l = className("android.widget.LinearLayout").clickable(true).drawingOrder(1).depth(12).findOne();
-        while (!l.click());
+        text("Filter by").waitFor();
+        while (!setText(x1));
+        text("Recently Used Mini Programs").waitFor();
+        click(x1, 1)
     };
 };
 
@@ -441,8 +475,8 @@ funcs.ui_wechat = function () {
     var options = ["Scan", "Pay", "Cancel"];
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
-        if (i == 0) { funcs.wechat_quicklaunch("Scan"); };
-        if (i == 1) { funcs.wechat_quicklaunch("Pay"); };
+        if (i == 0) { funcs.wechat_quicklaunch("Scan", 1); };
+        if (i == 1) { funcs.wechat_quicklaunch("Money", 1); };
     } else {
         exit();
     };
@@ -456,7 +490,7 @@ funcs.alipay_quicklaunch = function (x) {
     };
     var l = text("Home").id("com.alipay.android.phone.openplatform:id/tab_description").className("android.widget.TextView").findOne().bounds();
     while (!click(l.centerX(), l.centerY()));
-    text("More").id("com.alipay.android.phone.openplatform:id/app_text").waitFor();
+    text("Scan").className("android.widget.TextView").waitFor();
     while (!click(x));
 };
 
@@ -500,14 +534,79 @@ funcs.island_app = function (x1, x2) {
     funcs.tap_back(2, 500);
 };
 
+// "QQ"
+funcs.island_launch = function (x) {
+    app.openAppSetting("com.oasisfeng.island");
+    while (!click("Force stop"));
+    text("Cancel").waitFor();
+    while (!click("Force stop"));
+    funcs.tap_back(2, 500);
+    funcs.launch_package("com.oasisfeng.island");
+    while (!desc("Island").clickable(true).findOne().click());
+    while (!packageName("com.oasisfeng.island").clickable(true).desc("Search").findOne().click());
+    while (!setText(x));
+    id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).waitFor();
+    while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).textContains(x).exists()) {
+        while (!id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).findOne().click());
+        sleep(500);
+    };
+    var ly = id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).findOne().bounds();
+    var lx = desc("More options").clickable(true).className("android.widget.ImageButton").findOne().bounds();
+    while (!click(lx.centerX(), ly.centerY()));
+    sleep(500);
+    if (text("Turn on").exists()) {
+        while (!click("Turn on"));
+        sleep(4000);
+    };
+};
+
+funcs.vpn_setting = function () {
+    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
+    text("More connection settings").waitFor();
+    while (!click("More connection settings"));
+    text("VPN").waitFor();
+    while (!click("VPN"));
+};
+
+funcs.ui_transport = function () {
+    var options = ["Wechat transport", "Alipay transport", "Metro", "Meituan Riding", "Hello Riding", "Cancel"];
+    var i = dialogs.select("Please select function", options);
+    if (i >= 0) {
+        if (i == 0) { funcs.wechat_quicklaunch("乘车码", 2); };
+        if (i == 1) {
+            funcs.alipay_quicklaunch("Pay");
+            while (!click("Transport Code"));
+        };
+        if (i == 2) { funcs.island_launch("Metro大都会"); };
+        if (i == 3) { funcs.island_launch("Meituan"); };
+        if (i == 4) { funcs.island_launch("哈啰出行"); };
+    } else {
+        exit();
+    };
+};
+
+funcs.ui_else = function () {
+    var options = ["10 minutes sceen timeout", "Open VPN Settings", "Launch Cooking app", "Pair Miband3", "Cancel"];
+    var i = dialogs.select("Please select function", options);
+    if (i >= 0) {
+        if (i == 0) { funcs.screen_timeout("10 minutes"); };
+        if (i == 1) { funcs.vpn_setting(); };
+        if (i == 2) { funcs.island_app(["叮咚买菜", "每日优鲜", "下厨房", "永辉生活"], "Unfreeze"); };
+        if (i == 3) { funcs.MiBand3_pair(); };
+    } else {
+        exit();
+    };
+};
+
 funcs.ui_quicklaunch = function () {
-    var options = ["Wechat", "Alipay", "Wechat and QQ in Island", "Keep Screen On", "Cancel"];
-    var i = dialogs.select("Please select APP", options);
+    var options = ["Wechat", "Alipay", "Environment", "Transport", "Else", "Cancel"];
+    var i = dialogs.select("Please select function", options);
     if (i >= 0) {
         if (i == 0) { funcs.ui_wechat(); };
         if (i == 1) { funcs.ui_alipay(); };
-        if (i == 2) { funcs.island_app(["QQ", "QXposed", "WeChat", "WeXposed", "TaiChi"], "Unfreeze"); };
-        if (i == 3) { device.keepScreenDim(10 * 60000); };
+        if (i == 2) { funcs.ui_environment(); };
+        if (i == 3) { funcs.ui_transport(); };
+        if (i == 4) { funcs.ui_else(); };
     } else {
         exit();
     };
