@@ -4,7 +4,7 @@ var funcs = {};
 funcs.launch_package = function (x) {
     while (currentPackage() != x) {
         app.launchPackage(x);
-        sleep(1000);
+        sleep(2000);
     };
 };
 
@@ -225,10 +225,11 @@ funcs.timer_sound = function (x) {
     funcs.tap_back(2, 500);
 };
 
-funcs.off_nfc = function () {
+// "On" "Off"
+funcs.nfc = function (x) {
     funcs.launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
     text("NFC and payment").waitFor();
-    if (desc("NFC and payment").findOne().text() != "Off") {
+    if (desc("NFC and payment").findOne().text() != x) {
         while (!desc("NFC and payment").findOne().click());
         sleep(500);
     };
@@ -294,7 +295,7 @@ funcs.power_mode = function (x) {
     funcs.tap_back(3, 500);
 };
 
-funcs.freeze_app = function () {
+funcs.icebox_freeze_app = function () {
     while (!text("Island").className("android.widget.TextView").exists()) {
         home();
         sleep(500);
@@ -310,8 +311,18 @@ funcs.freeze_app = function () {
     };
 };
 
+funcs.greenify_freeze_app = function () {
+    funcs.launch_package("com.oasisfeng.greenify");
+    text("Greenify").className("android.widget.TextView").waitFor();
+    while (!(className("android.widget.ImageButton").clickable(true).id("com.oasisfeng.greenify:id/fab").findOne().click()));
+    text("Greenify").className("android.widget.TextView").waitFor();
+    sleep(8000);
+    funcs.tap_back(1, 500);
+}
+
 funcs.turnoff_work_profile = function () {
     funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
     while (!click("Work profile", 0)) {
         scrollDown();
         sleep(300);
@@ -360,8 +371,12 @@ funcs.bixby_voice_wakeup = function (x) {
     sleep(500);
 };
 
+// "On"  "Off"
 funcs.samsung_pay = function (x) {
     funcs.launch_package("com.samsung.android.spay");
+    text("Home").className("android.widget.TextView").waitFor();
+    var l = id("com.samsung.android.spay:id/iv_activity_spay_tab_bottom_tab_home_icon").findOne().bounds();
+    while (!click(l.centerX(), l.centerY()));
     id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").waitFor();
     while (!(id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").findOne().click()));
     text("Settings").waitFor();
@@ -384,12 +399,12 @@ funcs.go_out = function () {
     funcs.mobile_data("Mobile");
     funcs.wechat_logout();
     funcs.wechat_offspeaker("Enabled");
-    funcs.freeze_app();
+    funcs.greenify_freeze_app();
     funcs.adj_volume(0);
     funcs.adaptive_brightness();
     funcs.timer_sound("Silent");
     funcs.samsung_pay("On");
-    funcs.off_nfc();
+    funcs.nfc("On");
     funcs.hard_press_home("Off");
     funcs.power_mode("Medium power saving");
     funcs.screen_timeout("30 seconds");
@@ -409,7 +424,7 @@ funcs.back_home = function () {
     funcs.adaptive_brightness();
     funcs.timer_sound("Time Up");
     funcs.samsung_pay("Off");
-    funcs.off_nfc();
+    funcs.nfc("Off");
     funcs.mobile_data("OFF");
     funcs.hard_press_home("On");
     funcs.power_mode("Optimized");
@@ -585,14 +600,32 @@ funcs.ui_transport = function () {
     };
 };
 
+funcs.reserve_swimming = function () {
+    className("android.widget.TextView").text("报名工具").waitFor();
+    var l = text("报名工具").findOne().bounds();
+    while (!click(l.centerX(), l.centerY()));
+    className("android.view.View").text("立即报名").waitFor();
+    while (!className("android.widget.TextView").text("报名信息").exists()) {
+        var l = text("立即报名").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        sleep(100);
+    }
+    className("android.view.View").text("提交").waitFor();
+    while (!text("提交成功").exists()) {
+        var l = text("提交").findOne().bounds();
+        while (!click(l.centerX(), l.centerY()));
+        sleep(100);
+    }
+    alert("Success!")
+}
+
 funcs.ui_else = function () {
-    var options = ["10 minutes sceen timeout", "Open VPN Settings", "Launch Cooking app", "Pair Miband3", "Cancel"];
+    var options = ["10 minutes sceen timeout", "Swimming Club", "Pair Miband3", "Cancel"];
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
         if (i == 0) { funcs.screen_timeout("10 minutes"); };
-        if (i == 1) { funcs.vpn_setting(); };
-        if (i == 2) { funcs.island_app(["叮咚买菜", "每日优鲜", "下厨房", "永辉生活"], "Unfreeze"); };
-        if (i == 3) { funcs.MiBand3_pair(); };
+        if (i == 1) { funcs.reserve_swimming(); };
+        if (i == 2) { funcs.MiBand3_pair(); };
     } else {
         exit();
     };
