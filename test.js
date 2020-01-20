@@ -1,5 +1,5 @@
 var funcs = require('Functions.js');
 
 auto();
-funcs.reserve_swimming();
+funcs.island_app(["WeChat","TaiChi"],"Unfreeze");
 engines.stopAll();

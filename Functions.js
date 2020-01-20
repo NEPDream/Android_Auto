@@ -112,30 +112,6 @@ funcs.MiBand3_pair = function (x) {
     funcs.tap_back(5, 500)
 };
 
-funcs.wechat_logout = function () {
-    while (!text("Discover").exists()) {
-        funcs.tap_back(1, 500);
-        funcs.launch_package("com.tencent.mm");
-    };
-    var l = bounds(97, 2085, 173, 2161).findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    textContains("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
-    var l = textContains("WeChat").className("android.widget.TextView").drawingOrder(2).findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    while (!click(l.centerX(), l.centerY()));
-    sleep(1000);
-    if (textContains("Logged in to WeChat").exists()) {
-        l = textContains("Logged in to WeChat").className("android.widget.TextView").findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
-        text("Mute Mobile Alerts").waitFor();
-        while (!click("Log Out of WeChat"));
-        text("Exit").waitFor();
-        while (!click("Exit"));
-        text("Discover").waitFor();
-    };
-    funcs.tap_back(1, 500);
-};
-
 // "Disabled" "Enabled"
 funcs.wechat_offspeaker = function (x) {
     while (!text("Discover").exists()) {
@@ -397,7 +373,6 @@ funcs.go_out = function () {
     funcs.fastcharge("On");
     funcs.MiBand3_alert("On");
     funcs.mobile_data("Mobile");
-    funcs.wechat_logout();
     funcs.wechat_offspeaker("Enabled");
     funcs.greenify_freeze_app();
     funcs.adj_volume(0);
@@ -410,7 +385,6 @@ funcs.go_out = function () {
     funcs.screen_timeout("30 seconds");
     funcs.bixby_voice_wakeup("未使用");
     funcs.close_all();
-    funcs.turnoff_work_profile();
     device.cancelKeepingAwake();
     alert("Actions are done!");
 };
@@ -434,33 +408,6 @@ funcs.back_home = function () {
     alert("Actions are done!");
 };
 
-funcs.ui_environment = function () {
-    var options = ["Go out", "Back home", "Cancel"];
-    var i = dialogs.select("Please select environment", options);
-    if (i >= 0) {
-        if (i == 0) { funcs.go_out(); };
-        if (i == 1) { funcs.back_home(); };
-    } else {
-        exit();
-    };
-};
-
-// *************Calendar***************
-// "Add task" "Add event" | "Tasks" "Month"
-funcs.calendar_quicklaunch = function (x1, x2) {
-    while (!(desc("Add task").drawingOrder(2).exists() || desc("Add event").drawingOrder(2).exists())) {
-        funcs.tap_back(1, 300);
-        funcs.launch_package("com.samsung.android.calendar");
-    };
-    var l = className("android.widget.ImageButton").id("com.samsung.android.calendar:id/floating_action_button").findOne();
-    if (l.desc() != x1) {
-        var l = className("android.widget.FrameLayout").id("com.samsung.android.calendar:id/open_drawer_container").findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
-        text("Reminder").waitFor();
-        while (!click(x2));
-    };
-};
-
 // *************QuickLaunch***************
 // "Scan" "Money" | 1 2
 funcs.wechat_quicklaunch = function (x1, x2) {
@@ -472,28 +419,17 @@ funcs.wechat_quicklaunch = function (x1, x2) {
     while (!click(l.centerX(), l.centerY()));
     textContains("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
     if (x2 == 1) {
-        var l = id("com.tencent.mm:id/ra").clickable(true).className("android.widget.ImageView").findOne().bounds();
+        var l = bounds(972,96,1036,160).clickable(true).className("android.widget.ImageView").findOne().bounds();
         while (!click(l.centerX(), l.centerY()));
         while (!click(x1));
     };
     if (x2 == 2) {
-        var l = id("com.tencent.mm:id/r9").clickable(true).className("android.widget.ImageView").findOne().bounds();
+        var l = bounds(821,96,885,160).clickable(true).className("android.widget.ImageView").findOne().bounds();
         while (!click(l.centerX(), l.centerY()));
         text("Filter by").waitFor();
         while (!setText(x1));
         text("Recently Used Mini Programs").waitFor();
         click(x1, 1)
-    };
-};
-
-funcs.ui_wechat = function () {
-    var options = ["Scan", "Pay", "Cancel"];
-    var i = dialogs.select("Please select function", options);
-    if (i >= 0) {
-        if (i == 0) { funcs.wechat_quicklaunch("Scan", 1); };
-        if (i == 1) { funcs.wechat_quicklaunch("Money", 1); };
-    } else {
-        exit();
     };
 };
 
@@ -509,25 +445,16 @@ funcs.alipay_quicklaunch = function (x) {
     while (!click(x));
 };
 
-funcs.ui_alipay = function () {
-    var options = ["Scan", "Pay", "Cancel"];
-    var i = dialogs.select("Please select function", options);
-    if (i >= 0) {
-        if (i == 0) { funcs.alipay_quicklaunch("Scan"); };
-        if (i == 1) { funcs.alipay_quicklaunch("Pay"); };
-    } else {
-        exit();
-    };
-};
-
-// ["QQ","QXposed"] | "Unfreeze" "Freeze"
+// ["WeChat","TaiChi"] | "Unfreeze" "Freeze"
 funcs.island_app = function (x1, x2) {
     app.openAppSetting("com.oasisfeng.island");
+    text("Island").className("android.widget.TextView").waitFor();
     while (!click("Force stop"));
     text("Cancel").waitFor();
     while (!click("Force stop"));
     funcs.tap_back(2, 500);
     funcs.launch_package("com.oasisfeng.island");
+    text("Island").className("android.widget.TextView").waitFor();
     while (!desc("Island").clickable(true).findOne().click());
     for (var i in x1) {
         while (!packageName("com.oasisfeng.island").clickable(true).desc("Search").findOne().click());
@@ -575,31 +502,6 @@ funcs.island_launch = function (x) {
     };
 };
 
-funcs.vpn_setting = function () {
-    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
-    text("More connection settings").waitFor();
-    while (!click("More connection settings"));
-    text("VPN").waitFor();
-    while (!click("VPN"));
-};
-
-funcs.ui_transport = function () {
-    var options = ["Wechat transport", "Alipay transport", "Metro", "Meituan Riding", "Hello Riding", "Cancel"];
-    var i = dialogs.select("Please select function", options);
-    if (i >= 0) {
-        if (i == 0) { funcs.wechat_quicklaunch("乘车码", 2); };
-        if (i == 1) {
-            funcs.alipay_quicklaunch("Pay");
-            while (!click("Transport Code"));
-        };
-        if (i == 2) { funcs.island_launch("Metro大都会"); };
-        if (i == 3) { funcs.island_launch("Meituan"); };
-        if (i == 4) { funcs.island_launch("哈啰出行"); };
-    } else {
-        exit();
-    };
-};
-
 funcs.reserve_swimming = function () {
     className("android.widget.TextView").text("报名工具").waitFor();
     var l = text("报名工具").findOne().bounds();
@@ -611,35 +513,56 @@ funcs.reserve_swimming = function () {
         sleep(100);
     }
     className("android.view.View").text("提交").waitFor();
-    while (!text("提交成功").exists()) {
+    while (!text("确定").className("android.widget.Button").exists()) {
         var l = text("提交").findOne().bounds();
         while (!click(l.centerX(), l.centerY()));
+        sleep(100);
+    }
+    while(!text("提交成功").exists()){
+        text("确定").className("android.widget.Button").findOne().click();
         sleep(100);
     }
     alert("Success!")
 }
 
+funcs.resetUnionData=function(){
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    var l=text("Connections").className("android.widget.TextView").clickable(false).findOne().bounds();
+    while(!click(l.centerX(),l.centerY()));
+    text("Data usage").waitFor();
+    while(!click("Data usage"));
+    text("UNICOM").waitFor();
+    while(!click("UNICOM"));
+    while(!click("Enter usage data"));
+    text("Set").className("android.widget.Button").clickable(true).waitFor();
+    while(!setText("0"));
+    while(!text("Set").className("android.widget.Button").clickable(true).findOne().click());
+    sleep(200);
+    funcs.tap_back(3,500);
+}
+
 funcs.ui_else = function () {
-    var options = ["10 minutes sceen timeout", "Swimming Club", "Pair Miband3", "Cancel"];
+    var options = ["10 minutes sceen timeout", "Swimming Club", "Pair Miband3", "Reset Union Data","Unfreeze Wechat in Island","Cancel"];
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
         if (i == 0) { funcs.screen_timeout("10 minutes"); };
         if (i == 1) { funcs.reserve_swimming(); };
         if (i == 2) { funcs.MiBand3_pair(); };
+        if (i == 3) { funcs.resetUnionData(); };
+        if (i == 4) { funcs.island_app(["WeChat","TaiChi"],"Unfreeze"); };
     } else {
         exit();
     };
 };
 
 funcs.ui_quicklaunch = function () {
-    var options = ["Wechat", "Alipay", "Environment", "Transport", "Else", "Cancel"];
+    var options = ["Go out", "Back home", "Else", "Cancel"];
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
-        if (i == 0) { funcs.ui_wechat(); };
-        if (i == 1) { funcs.ui_alipay(); };
-        if (i == 2) { funcs.ui_environment(); };
-        if (i == 3) { funcs.ui_transport(); };
-        if (i == 4) { funcs.ui_else(); };
+        if (i == 0) { funcs.go_out(); };
+        if (i == 1) { funcs.back_home(); };
+        if (i == 2) { funcs.ui_else(); };
     } else {
         exit();
     };

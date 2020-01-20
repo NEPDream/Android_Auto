@@ -1,5 +1,5 @@
 var funcs = require('Functions.js');
 
 auto();
-funcs.calendar_quicklaunch("Add task", "Tasks");
+funcs.wechat_quicklaunch("Money",1);
 engines.stopAll();
