@@ -3,18 +3,8 @@ var funcs = {};
 // *************Dependencies***************
 funcs.launch_package = function (x) {
     while (currentPackage() != x) {
-        app.launchPackage(x);
+        app.launch(x);
         sleep(2000);
-    };
-};
-
-funcs.launch_activity = function (x1, x2) {
-    while (currentActivity() != x2) {
-        app.startActivity({
-            packageName: x1,
-            className: x2,
-        });
-        sleep(1000);
     };
 };
 
@@ -30,26 +20,30 @@ funcs.tap_back = function (x1, x2) {
 // *************Environment***************
 // "10 minutes" "30 seconds"
 funcs.screen_timeout = function (x) {
-    funcs.launch_activity("com.android.settings", "com.samsung.android.settings.display.ScreenTimeoutActivity");
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    while (!click(335, 1705));
+    text("Blue light filter").waitFor();
+    while (!click("Screen timeout"));
     while (!click(x));
+    funcs.tap_back(2, 500);
     sleep(500);
 };
 
 // "On" "Off"
 funcs.fastcharge = function (x) {
-    funcs.launch_activity("com.samsung.android.sm_cn", "com.samsung.android.sm.battery.ui.BatteryActivity");
     while (device.isCharging()) {
         alert("Please disconnect charger!");
     };
-    var l = className("android.support.v7.widget.LinearLayoutCompat").findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    while (!click("Settings"));
-    var l = text("Advanced cable charging").findOne(1000).bounds();
-    var a = boundsInside(0, l.top, device.width, device.height).clickable(true).findOne()
-    if (a.text() != x) {
-        while (!a.click());
-        sleep(500);
-    };
+    funcs.launch_package("com.samsung.android.sm_cn");
+    text("Battery").waitFor();
+    while (!click("Battery"));
+    text("Power mode").waitFor();
+    className("android.widget.Switch").id("switch_widget").find().forEach(function (i) {
+        if (i.text() != x) {
+            while (!i.click());
+        }
+    });
     funcs.tap_back(2, 500);
 };
 
@@ -95,26 +89,34 @@ funcs.MiBand3_alert = function (x) {
         };
         while (!id("com.xiaomi.hm.health:id/common_title_left_image").clickable(true).findOne().click());
     };
-    funcs.tap_back(3, 500);
+    funcs.tap_back(4, 500);
 };
 
-funcs.MiBand3_pair = function (x) {
-    funcs.launch_package("com.xiaomi.hm.health");
-    while (!click("Profile"));
-    while (!click("Mi Band 3"));
-    text("Unlock screen").waitFor();
-    while (textContains("Syncing data").exists());
-    while (!click("Unlock screen"));
-    text("Go to Settings").waitFor();
-    while (!click("Go to Settings"));
-    textContains("Bluetooth pairing request").waitFor();
-    while (!click("OK"));
-    funcs.tap_back(5, 500)
+funcs.Mi3_SmartUnlock = function () {
+    funcs.launch_package("com.android.settings");
+    while (!click("Screen lock type"));
+    text("Smart Lock").waitFor();
+    while (!click("Smart Lock"));
+    text("Trusted devices").waitFor();
+    while (!click("Trusted devices"));
+    text("Add trusted device").waitFor();
+    if (text("Mi Band 3").exists()) {
+        sleep(500);
+        funcs.tap_back(4, 500);
+    } else {
+        while (!click("Add trusted device"));
+        text("Mi Band 3").waitFor();
+        while (!click("Mi Band 3"));
+        text("YES, ADD").waitFor();
+        while (!click("YES, ADD"));
+        sleep(500);
+        funcs.tap_back(4, 500);
+    }
 };
 
 // "Disabled" "Enabled"
 funcs.wechat_offspeaker = function (x) {
-    while (!text("Discover").exists()) {
+    while (!className("android.widget.TextView").text("Discover").exists()) {
         funcs.tap_back(1, 500);
         funcs.launch_package("com.tencent.mm");
     };
@@ -125,51 +127,29 @@ funcs.wechat_offspeaker = function (x) {
     text("Account Security").waitFor();
     while (!click("Chats"));
     text("Press Enter to Send").waitFor();
-    var l = text("Press Enter to Send").findOne().bounds();
-    var a = boundsInside(0, 0, device.width, l.top).className("android.view.View").drawingOrder(3).enabled(true).focusable(true).findOne();
-    if (a.desc() != x) {
-        while (!click(a.bounds().centerX(), a.bounds().centerY()));
-        sleep(1000);
-    };
+    var l = className("android.view.View").id("com.tencent.mm:id/aol").find().get(0);
+    while (l.desc() != x) {
+        while (!click(l.bounds().centerX(), l.bounds().centerY()));
+        sleep(500);
+        l = className("android.view.View").id("com.tencent.mm:id/aol").find().get(0);
+    }
     funcs.tap_back(3, 500);
 };
 
-// 0 1
+// 0 1/3
 funcs.adj_volume = function (x) {
-    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$SoundSettingsActivity");
-    while (!click("Sound mode"));
-    text("Mute").waitFor();
+    funcs.launch_package("com.android.settings");
+    text("Sounds and vibration").waitFor();
+    while (!click(392, 1295));
+    sleep(500);
     if (x == 0) {
-        while (!click("Vibrate"));
-        while (!desc("Navigate up").findOne().click());
-        text("Volume").waitFor();
+        while (!click(538, 538));
     } else {
-        while (!click("Sound"));
-        while (!desc("Navigate up").findOne().click());
-        text("Volume").waitFor();
-    };
-    var l = text("Volume").className("android.widget.TextView").findOne().bounds();
-    while (!text("Bixby Voice").exists()) {
-        while (!click(l.centerX(), l.centerY()));
-        sleep(500);
-    };
-    if (x == 0) {
-        var l = desc("Media").findOne().bounds();
-        while (!swipe(l.centerX(), l.centerY(), l.left, l.centerY(), 200));
-        var l = desc("Bixby Voice").findOne().bounds();
-        while (!swipe(l.centerX(), l.centerY(), l.left, l.centerY(), 200));
-    } else {
-        var l = desc("Ringtone").findOne(5000).bounds();
-        while (!swipe(l.left, l.centerY(), (l.centerX() + l.left) / 2, l.centerY(), 200));
-        var l = desc("Notifications").findOne(5000).bounds();
-        while (!swipe(l.left, l.centerY(), (l.centerX() + l.left) / 2, l.centerY(), 200));
-        var l = desc("Media").findOne(5000).bounds();
-        while (!swipe(l.left, l.centerY(), (l.centerX() + l.left) / 2, l.centerY(), 200));
-        var l = desc("Bixby Voice").findOne(5000).bounds();
-        while (!swipe((l.centerX() + l.left) / 2, l.centerY(), (l.centerX() + l.right) / 2, l.centerY(), 200));
-        var l = desc("System").findOne(5000).bounds();
-        while (!swipe((l.centerX() + l.left) / 2, l.centerY(), l.left, l.centerY(), 200));
-    };
+        while (!click(205, 508));
+    }
+    device.setMusicVolume(device.getMusicMaxVolume() * x);
+    device.setNotificationVolume(device.getNotificationMaxVolume() * x);
+    device.setAlarmVolume(device.getAlarmMaxVolume());
     funcs.tap_back(2, 500);
 };
 
@@ -179,60 +159,75 @@ funcs.adaptive_brightness = function () {
     device.setBrightnessMode(1);
 };
 
-// "Time Up"  "Silent"
+// "On"  "Off"
 funcs.timer_sound = function (x) {
     funcs.launch_package("com.sec.android.app.clockpackage");
     while (!click("Timer"));
-    var l = boundsInside(0, 0, device.width, 1 / 3 * device.height).className("android.widget.FrameLayout").clickable(false).drawingOrder(2).enabled(true).findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    while (!click("Set timer sound"));
-    if (x == "Silent") {
-        while (!click(x)) {
-            scrollUp();
-            sleep(500);
-        };
+    text("Seconds").waitFor();
+    while (!click(1000, 140));
+    sleep(500);
+    while (!click(815, 150));
+    text("Show weather").waitFor();
+    var l = id("com.sec.android.app.clockpackage:id/timer_sound_switch").findOne();
+    while (l.text() != x) {
+        while (!l.click());
+        sleep(200);
+        l = id("com.sec.android.app.clockpackage:id/timer_sound_switch").findOne();
     }
-    if (x == "Time Up") {
-        while (!click(x)) {
-            scrollDown();
-            sleep(500);
-        };
-    };
+    sleep(300);
+    l = id("com.sec.android.app.clockpackage:id/timer_vib_switch").findOne();
+    while (l.text() == x) {
+        while (!l.click());
+        sleep(500);
+        l = id("com.sec.android.app.clockpackage:id/timer_vib_switch").findOne();
+    }
     funcs.tap_back(2, 500);
 };
 
 // "On" "Off"
 funcs.nfc = function (x) {
-    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    while (!click(530, 1045));
     text("NFC and payment").waitFor();
-    if (desc("NFC and payment").findOne().text() != x) {
+    while (desc("NFC and payment").findOne().text() != x) {
         while (!desc("NFC and payment").findOne().click());
         sleep(500);
     };
-    funcs.tap_back(1, 500);
+    funcs.tap_back(2, 500);
 };
 
-// "OFF" "ATT"
+// "OFF" "Unicom" "Mobile"
 funcs.mobile_data = function (x) {
-    funcs.launch_activity("com.sec.android.app.simsettingmgr", "com.sec.android.app.simsettingmgr.NetworkManagement");
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    while (!click(530, 1045));
+    text("NFC and payment").waitFor();
+    while (!click("SIM card manager"));
+    text("Preferred SIM card").waitFor();
     while (!click("Mobile data"));
     while (!click(x));
-    funcs.tap_back(1, 500);
+    funcs.tap_back(3, 500);
 };
 
 // "Off" "On"
 funcs.switch_wlan = function (x) {
-    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$ConnectionsSettingsActivity");
-    if (desc("WLAN").findOne().text() != x) {
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    while (!click(530, 1045));
+    text("NFC and payment").waitFor();
+    while (desc("WLAN").findOne().text() != x) {
         while (!desc("WLAN").findOne().click());
         sleep(500);
     };
-    funcs.tap_back(1, 500);
+    funcs.tap_back(2, 500);
 };
 
 // "On" "Off"
 funcs.hard_press_home = function (x) {
-    funcs.launch_activity("com.android.settings", "com.android.settings.Settings$DisplaySettingsActivity");
+    funcs.launch_package("com.android.settings");
+    text("Connections").waitFor();
+    while (!click(335, 1705));
     text("Blue light filter").waitFor();
     while (!click("Navigation bar")) {
         scrollDown();
@@ -243,7 +238,7 @@ funcs.hard_press_home = function (x) {
         while (!desc("Hard press Home button").findOne().click());
         sleep(500);
     };
-    funcs.tap_back(2, 500);
+    funcs.tap_back(3, 500);
 };
 
 funcs.close_all = function () {
@@ -255,9 +250,11 @@ funcs.close_all = function () {
 
 // "Optimized" "Medium power saving"
 funcs.power_mode = function (x) {
-    funcs.launch_activity("com.samsung.android.sm_cn", "com.samsung.android.sm.battery.ui.BatteryActivity");
-    text("Battery life optimizer").waitFor();
-    if (id("com.samsung.android.sm_cn:id/current_mode").findOne().text() != x) {
+    funcs.launch_package("com.samsung.android.sm_cn");
+    text("Battery").waitFor();
+    while (!click("Battery"));
+    text("Power mode").waitFor();
+    if (id("android:id/summary").findOne().text() != x) {
         while (!click("Power mode"));
         textContains("Select a mode below").waitFor();
         while (!click(x));
@@ -271,51 +268,14 @@ funcs.power_mode = function (x) {
     funcs.tap_back(3, 500);
 };
 
-funcs.icebox_freeze_app = function () {
-    while (!text("Island").className("android.widget.TextView").exists()) {
-        home();
-        sleep(500);
-    };
-    while (!click("Island"));
-    while (!click("Ice Box"));
-    sleep(500);
-    if (textContains("Turn on").exists()) {
-        while (!click("Cancel"));
-    } else {
-        text("APPS").waitFor();
-        while (!className("android.widget.LinearLayout").clickable(true).id("com.catchingnow.icebox:id/b1").drawingOrder(6).findOne().click());
-    };
-};
-
 funcs.greenify_freeze_app = function () {
     funcs.launch_package("com.oasisfeng.greenify");
     text("Greenify").className("android.widget.TextView").waitFor();
     while (!(className("android.widget.ImageButton").clickable(true).id("com.oasisfeng.greenify:id/fab").findOne().click()));
     text("Greenify").className("android.widget.TextView").waitFor();
     sleep(8000);
-    funcs.tap_back(1, 500);
+    // funcs.tap_back(1, 500);
 }
-
-funcs.turnoff_work_profile = function () {
-    funcs.launch_package("com.android.settings");
-    text("Connections").waitFor();
-    while (!click("Work profile", 0)) {
-        scrollDown();
-        sleep(300);
-    };
-    sleep(500);
-    if (text("Cancel").exists()) {
-        while (!click("Cancel"));
-        funcs.tap_back(2, 500);
-    } else {
-        textContains("Use work apps and receive related notifications").waitFor();
-        var l = text("Apps and data").findOne().bounds();
-        var a = boundsInside(0, l.top, device.width, device.height).className("android.widget.Switch").clickable(true).id("android:id/switch_widget").findOne();
-        while (!a.click());
-        while (!click("TURN OFF"));
-        sleep(5000);
-    };
-};
 
 // "使用中" "未使用"
 funcs.bixby_voice_wakeup = function (x) {
@@ -329,16 +289,14 @@ funcs.bixby_voice_wakeup = function (x) {
     text("Bixby Voice").clickable(true).waitFor();
     while (!text("Bixby Voice").clickable(true).findOne().click());
     sleep(1000);
-    desc("搜索").waitFor();
-    var a = desc("搜索").findOne().bounds();
-    var l = boundsInside(a.right, 0, device.width, device.height).className("android.widget.FrameLayout").enabled(true).findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    className("android.widget.LinearLayout").depth(3).clickable(true).drawingOrder(4).packageName("com.samsung.android.bixby.agent").findOne().click()
+    desc("抽屉导航").waitFor();
+    while (!desc("抽屉导航").findOne().click());
+    id("com.samsung.android.bixby.agent:id/drawer_settings_icon_container").waitFor();
+    id("com.samsung.android.bixby.agent:id/drawer_settings_icon_container").findOne().click();
     text("语音唤醒").waitFor();
     while (!click("语音唤醒"));
     text("提升语音唤醒的准确性").waitFor();
-    var a = text("语音解锁").findOne().bounds();
-    var l = boundsInside(0, 0, device.width, a.top).className("android.widget.Switch").clickable(true).findOne();
+    var l = id("com.samsung.android.bixby.agent:id/switch_widget").findOne();
     if (l.text() != x) {
         while (!l.click());
     };
@@ -355,8 +313,8 @@ funcs.samsung_pay = function (x) {
     while (!click(l.centerX(), l.centerY()));
     id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").waitFor();
     while (!(id("com.samsung.android.spay:id/iv_fragment_spay_home_drawer_button").findOne().click()));
-    text("Settings").waitFor();
-    while (!click("Settings"));
+    id("com.samsung.android.spay:id/iv_activity_spay_more_menu_settings").waitFor();
+    while (!id("com.samsung.android.spay:id/iv_activity_spay_more_menu_settings").findOne().click());
     text("Quick access").waitFor();
     while (!click("Quick access"));
     text("Lock screen").waitFor();
@@ -377,7 +335,7 @@ funcs.go_out = function () {
     funcs.greenify_freeze_app();
     funcs.adj_volume(0);
     funcs.adaptive_brightness();
-    funcs.timer_sound("Silent");
+    funcs.timer_sound("Off");
     funcs.samsung_pay("On");
     funcs.nfc("On");
     funcs.hard_press_home("Off");
@@ -394,9 +352,9 @@ funcs.back_home = function () {
     funcs.switch_wlan("On");
     funcs.MiBand3_alert("Off");
     funcs.wechat_offspeaker("Disabled");
-    funcs.adj_volume(1);
+    funcs.adj_volume(1 / 3);
     funcs.adaptive_brightness();
-    funcs.timer_sound("Time Up");
+    funcs.timer_sound("On");
     funcs.samsung_pay("Off");
     funcs.nfc("Off");
     funcs.mobile_data("OFF");
@@ -409,99 +367,6 @@ funcs.back_home = function () {
 };
 
 // *************QuickLaunch***************
-// "Scan" "Money" | 1 2
-funcs.wechat_quicklaunch = function (x1, x2) {
-    while (!text("Discover").exists()) {
-        funcs.tap_back(1, 500);
-        funcs.launch_package("com.tencent.mm");
-    };
-    var l = bounds(97, 2085, 173, 2161).findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    textContains("WeChat").className("android.widget.TextView").drawingOrder(2).waitFor();
-    if (x2 == 1) {
-        var l = bounds(972,96,1036,160).clickable(true).className("android.widget.ImageView").findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
-        while (!click(x1));
-    };
-    if (x2 == 2) {
-        var l = bounds(821,96,885,160).clickable(true).className("android.widget.ImageView").findOne().bounds();
-        while (!click(l.centerX(), l.centerY()));
-        text("Filter by").waitFor();
-        while (!setText(x1));
-        text("Recently Used Mini Programs").waitFor();
-        click(x1, 1)
-    };
-};
-
-// "Scan" "Pay"
-funcs.alipay_quicklaunch = function (x) {
-    while (!text("Home").id("com.alipay.android.phone.openplatform:id/tab_description").exists()) {
-        funcs.tap_back(1, 500);
-        funcs.launch_package("com.eg.android.AlipayGphone");
-    };
-    var l = text("Home").id("com.alipay.android.phone.openplatform:id/tab_description").className("android.widget.TextView").findOne().bounds();
-    while (!click(l.centerX(), l.centerY()));
-    text("Scan").className("android.widget.TextView").waitFor();
-    while (!click(x));
-};
-
-// ["WeChat","TaiChi"] | "Unfreeze" "Freeze"
-funcs.island_app = function (x1, x2) {
-    app.openAppSetting("com.oasisfeng.island");
-    text("Island").className("android.widget.TextView").waitFor();
-    while (!click("Force stop"));
-    text("Cancel").waitFor();
-    while (!click("Force stop"));
-    funcs.tap_back(2, 500);
-    funcs.launch_package("com.oasisfeng.island");
-    text("Island").className("android.widget.TextView").waitFor();
-    while (!desc("Island").clickable(true).findOne().click());
-    for (var i in x1) {
-        while (!packageName("com.oasisfeng.island").clickable(true).desc("Search").findOne().click());
-        while (!setText(x1[i]));
-        id("com.oasisfeng.island:id/entry_name").text(x1[i]).clickable(true).waitFor();
-        while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).textContains(x1[i]).exists()) {
-            while (!id("com.oasisfeng.island:id/entry_name").text(x1[i]).clickable(true).findOne().click());
-            sleep(500);
-        };
-        if (boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().desc() == x2) {
-            while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).className("android.widget.Button").clickable(true).findOne().click());
-        };
-        sleep(500);
-        if (text("Turn on").exists()) {
-            while (!click("Turn on"));
-            sleep(4000);
-        };
-    };
-    funcs.tap_back(2, 500);
-};
-
-// "QQ"
-funcs.island_launch = function (x) {
-    app.openAppSetting("com.oasisfeng.island");
-    while (!click("Force stop"));
-    text("Cancel").waitFor();
-    while (!click("Force stop"));
-    funcs.tap_back(2, 500);
-    funcs.launch_package("com.oasisfeng.island");
-    while (!desc("Island").clickable(true).findOne().click());
-    while (!packageName("com.oasisfeng.island").clickable(true).desc("Search").findOne().click());
-    while (!setText(x));
-    id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).waitFor();
-    while (!boundsInside(0, 2 / 3 * device.height, device.width, device.height).textContains(x).exists()) {
-        while (!id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).findOne().click());
-        sleep(500);
-    };
-    var ly = id("com.oasisfeng.island:id/entry_name").text(x).clickable(true).findOne().bounds();
-    var lx = desc("More options").clickable(true).className("android.widget.ImageButton").findOne().bounds();
-    while (!click(lx.centerX(), ly.centerY()));
-    sleep(500);
-    if (text("Turn on").exists()) {
-        while (!click("Turn on"));
-        sleep(4000);
-    };
-};
-
 funcs.reserve_swimming = function () {
     className("android.widget.TextView").text("报名工具").waitFor();
     var l = text("报名工具").findOne().bounds();
@@ -518,39 +383,20 @@ funcs.reserve_swimming = function () {
         while (!click(l.centerX(), l.centerY()));
         sleep(100);
     }
-    while(!text("提交成功").exists()){
+    while (!text("提交成功").exists()) {
         text("确定").className("android.widget.Button").findOne().click();
         sleep(100);
     }
     alert("Success!")
 }
 
-funcs.resetUnionData=function(){
-    funcs.launch_package("com.android.settings");
-    text("Connections").waitFor();
-    var l=text("Connections").className("android.widget.TextView").clickable(false).findOne().bounds();
-    while(!click(l.centerX(),l.centerY()));
-    text("Data usage").waitFor();
-    while(!click("Data usage"));
-    text("UNICOM").waitFor();
-    while(!click("UNICOM"));
-    while(!click("Enter usage data"));
-    text("Set").className("android.widget.Button").clickable(true).waitFor();
-    while(!setText("0"));
-    while(!text("Set").className("android.widget.Button").clickable(true).findOne().click());
-    sleep(200);
-    funcs.tap_back(3,500);
-}
-
 funcs.ui_else = function () {
-    var options = ["10 minutes sceen timeout", "Swimming Club", "Pair Miband3", "Reset Union Data","Unfreeze Wechat in Island","Cancel"];
+    var options = ["10 minutes sceen timeout", "Smart Unlock", "Cancel"];
     var i = dialogs.select("Please select function", options);
     if (i >= 0) {
         if (i == 0) { funcs.screen_timeout("10 minutes"); };
-        if (i == 1) { funcs.reserve_swimming(); };
-        if (i == 2) { funcs.MiBand3_pair(); };
-        if (i == 3) { funcs.resetUnionData(); };
-        if (i == 4) { funcs.island_app(["WeChat","TaiChi"],"Unfreeze"); };
+        // if (i == 1) { funcs.reserve_swimming(); };
+        if (i == 1) { funcs.Mi3_SmartUnlock(); };
     } else {
         exit();
     };
